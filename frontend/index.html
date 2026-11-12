@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111d4a" />
+    <meta name="description" content="نموذج عرض تجريبي لنظام حضور DELTA" />
+    <title>DELTA | نظام حضور الموظفين</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/variables.css" />
+    <link rel="stylesheet" href="./css/global.css" />
+    <link rel="stylesheet" href="./css/responsive.css" />
+    <script type="module" src="./js/app.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar" aria-label="التنقل الرئيسي">
+        <div class="brand-lockup">
+          <img class="brand-logo" src="./assets/images/delta-logo.png" alt="DELTA – Public Accountants & Consultants" />
+          <div class="brand-caption" data-i18n="productShort">نظام الحضور الميداني</div>
+        </div>
+
+        <div class="workspace-label"><span class="workspace-dot"></span><span data-i18n="workspace">مساحة العمل</span><span class="demo-tag" data-i18n="demoTag">عرض تجريبي</span></div>
+
+        <nav class="primary-nav" id="primaryNav"></nav>
+
+        <div class="sidebar-bottom">
+          <div class="support-card">
+            <div class="support-icon">?</div>
+            <div><strong data-i18n="needHelp">تحتاج مساعدة؟</strong><span data-i18n="contactAdmin">تواصل مع مسؤول النظام</span></div>
+            <span class="support-arrow">↗</span>
+          </div>
+          <div class="sidebar-user">
+            <div class="avatar avatar-sidebar" id="sidebarAvatar">م</div>
+            <div class="sidebar-user-copy"><strong id="sidebarUserName">مريم عادل</strong><span id="sidebarUserRole">مسؤول النظام</span></div>
+            <button class="icon-button quiet" id="userMenuButton" aria-label="خيارات المستخدم" title="خيارات المستخدم">•••</button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="mobile-scrim" id="mobileScrim"></div>
+
+      <div class="main-column">
+        <header class="topbar">
+          <div class="topbar-start">
+            <button class="icon-button mobile-menu" id="mobileMenuButton" aria-label="فتح القائمة">☰</button>
+            <div class="breadcrumb"><span data-i18n="companyName">DELTA</span><span class="breadcrumb-divider">/</span><strong id="breadcrumbCurrent">لوحة المعلومات</strong></div>
+          </div>
+          <div class="topbar-actions">
+            <div class="demo-mode"><span class="live-dot"></span><span data-i18n="demoMode">وضع العرض</span><span class="demo-mode-divider"></span><span data-i18n="sampleData">بيانات افتراضية</span></div>
+            <label class="role-switcher"><span data-i18n="roleLabel">عرض الواجهة حسب الدور</span><select id="roleSwitcher" aria-label="عرض الواجهة حسب الدور"><option value="admin" data-i18n="admin">مسؤول النظام</option><option value="manager" data-i18n="manager">مدير القسم</option><option value="employee" data-i18n="employee">الموظف</option></select></label>
+            <button class="language-toggle" id="languageToggle" aria-label="Switch language">EN <span class="language-globe">◎</span></button>
+            <button class="icon-button notification-button" id="notificationsButton" aria-label="الإشعارات"><span>♧</span><i></i></button>
+            <div class="topbar-profile"><div class="avatar avatar-top" id="topAvatar">م</div><div class="topbar-profile-copy"><strong id="topUserName">مريم عادل</strong><span id="topUserRole">مسؤول النظام</span></div><span class="chevron">⌄</span></div>
+          </div>
+        </header>
+
+        <div class="demo-notice" role="note"><span class="notice-icon">ⓘ</span><span data-i18n="demoNotice">هذه نسخة عرض ببيانات افتراضية. أي تسجيل حضور هنا للمحاكاة فقط ولا يُحفظ في قاعدة بيانات.</span><button id="dismissNotice" aria-label="إخفاء التنبيه">×</button></div>
+
+        <main class="page-content" id="pageContent" tabindex="-1"></main>
+
+        <footer class="page-footer"><span>© <span id="footerYear"></span> DELTA – Public Accountants &amp; Consultants</span><span data-i18n="footerNote">نسخة عرض تفاعلية · لا تحتوي على بيانات فعلية</span></footer>
+      </div>
+    </div>
+
+    <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+    <dialog class="modal" id="gpsModal" aria-labelledby="gpsModalTitle"></dialog>
+    <dialog class="modal" id="detailModal" aria-labelledby="detailModalTitle"></dialog>
+  </body>
+</html>

@@ -1,0 +1,145 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  HR_ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum AttendanceStatus {
+  PENDING_REVIEW
+  REVIEWED
+  FLAGGED
+  REJECTED
+}
+
+model User {
+  id                 String              @id @default(uuid()) @db.Uuid
+  email              String              @unique
+  passwordHash       String              @map("password_hash")
+  role               Role
+  languagePreference String              @default("en") @map("language_preference") @db.VarChar(5)
+  isActive           Boolean             @default(true) @map("is_active")
+  employee           Employee?
+  managedDepartments ManagerDepartment[]
+  auditLogs          AuditLog[]
+  passwordResets     PasswordReset[]
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("users")
+}
+
+model Department {
+  id           String              @id @default(uuid()) @db.Uuid
+  nameEn       String              @map("name_en")
+  nameAr       String              @map("name_ar")
+  employees    Employee[]
+  managers     ManagerDepartment[]
+  attendance   Attendance[]
+  createdAt    DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("departments")
+}
+
+model Employee {
+  id             String       @id @default(uuid()) @db.Uuid
+  userId         String       @unique @map("user_id") @db.Uuid
+  employeeNumber String       @unique @map("employee_number")
+  fullNameEn     String       @map("full_name_en")
+  fullNameAr     String       @map("full_name_ar")
+  jobTitle       String?      @map("job_title")
+  departmentId   String       @map("department_id") @db.Uuid
+  user           User         @relation(fields: [userId], references: [id], onDelete: Restrict)
+  department     Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  attendance     Attendance[]
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([departmentId])
+  @@map("employees")
+}
+
+model ManagerDepartment {
+  managerId    String     @map("manager_id") @db.Uuid
+  departmentId String     @map("department_id") @db.Uuid
+  manager      User       @relation(fields: [managerId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([managerId, departmentId])
+  @@index([departmentId])
+  @@map("manager_departments")
+}
+
+model Attendance {
+  id                   String           @id @default(uuid()) @db.Uuid
+  employeeId           String           @map("employee_id") @db.Uuid
+  departmentIdSnapshot String           @map("department_id_snapshot") @db.Uuid
+  attendanceDate       DateTime         @map("attendance_date") @db.Date
+  serverTimestamp      DateTime         @default(now()) @map("server_timestamp") @db.Timestamptz(6)
+  latitude             Decimal          @db.Decimal(9, 6)
+  longitude            Decimal          @db.Decimal(9, 6)
+  accuracyMeters       Decimal          @map("accuracy_meters") @db.Decimal(8, 2)
+  locationCapturedAt   DateTime?        @map("location_captured_at") @db.Timestamptz(6)
+  address              String?
+  idempotencyKey       String           @map("idempotency_key") @db.VarChar(128)
+  status               AttendanceStatus @default(PENDING_REVIEW)
+  reviewedByUserId     String?          @map("reviewed_by_user_id") @db.Uuid
+  reviewedAt           DateTime?        @map("reviewed_at") @db.Timestamptz(6)
+  reviewNote           String?          @map("review_note")
+  employee             Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  departmentSnapshot   Department       @relation(fields: [departmentIdSnapshot], references: [id], onDelete: Restrict)
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@unique([employeeId, idempotencyKey])
+  @@index([employeeId, serverTimestamp(sort: Desc)])
+  @@index([departmentIdSnapshot, serverTimestamp(sort: Desc)])
+  @@index([attendanceDate])
+  @@index([status, serverTimestamp(sort: Desc)])
+  @@map("attendance")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  actorUserId String?  @map("actor_user_id") @db.Uuid
+  action      String
+  targetType  String   @map("target_type")
+  targetId    String?  @map("target_id")
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  actor       User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([targetType, targetId])
+  @@index([actorUserId, createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
+
+model PasswordReset {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_resets")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("system_settings")
+}
